@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Course - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <a href="{{ url_for('admin_courses') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Courses
+        </a>
+        <h1 class="text-3xl font-bold text-black">Add New Course</h1>
+        <p class="text-black">Create a new course offering for your students</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="title" class="block text-sm font-medium text-black mb-2">Course Title</label>
+                    <input type="text" id="title" name="title" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                           placeholder="Enter course title">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="description" class="block text-sm font-medium text-black mb-2">Course Description</label>
+                    <textarea id="description" name="description" rows="6" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                              placeholder="Describe what students will learn in this course..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="duration" class="block text-sm font-medium text-black mb-2">Duration</label>
+                    <input type="text" id="duration" name="duration" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                           placeholder="e.g., 3 months, 6 weeks, 40 hours">
+                </div>
+                
+                <div>
+                    <label for="price" class="block text-sm font-medium text-black mb-2">Price (₦)</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                           placeholder="0.00">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="course_image" class="block text-sm font-medium text-black mb-2">Course Image</label>
+                    <input type="file" id="course_image" name="course_image" accept="image/*"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black">
+                    <p class="text-sm text-gray-500 mt-1">Upload an image file (JPG, PNG, GIF)</p>
+                </div>
+            </div>
+            
+            <!-- Preview Section -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-black mb-4">Preview</h3>
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <div class="max-w-md mx-auto">
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="h-48 bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-6xl text-gray-400" id="preview-image"></i>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold text-white bg-blue-600 px-3 py-2 rounded" id="preview-title">Course Title</h3>
+                                <p class="text-black mb-4" id="preview-description">Course description will appear here...</p>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-sm text-gray-500" id="preview-duration">
+                                        <i class="fas fa-clock mr-1"></i>Duration
+                                    </span>
+                                    <span class="text-2xl font-bold text-blue-600" id="preview-price">₦0.00</span>
+                                </div>
+                                <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('admin_courses') }}" 
+                   class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-300">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+                    <i class="fas fa-save mr-2"></i>
+                    Create Course
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const durationInput = document.getElementById('duration');
+    const priceInput = document.getElementById('price');
+    const imageInput = document.getElementById('course_image');
+    
+    const previewTitle = document.getElementById('preview-title');
+    const previewDescription = document.getElementById('preview-description');
+    const previewDuration = document.getElementById('preview-duration');
+    const previewPrice = document.getElementById('preview-price');
+    const previewImage = document.getElementById('preview-image');
+    
+    function updatePreview() {
+        previewTitle.textContent = titleInput.value || 'Course Title';
+        previewDescription.textContent = descriptionInput.value || 'Course description will appear here...';
+        previewDuration.innerHTML = `<i class="fas fa-clock mr-1"></i>${durationInput.value || 'Duration'}`;
+        previewPrice.textContent = `₦${parseFloat(priceInput.value || 0).toFixed(2)}`;
+        
+        if (imageInput.files && imageInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.innerHTML = `<img src="${e.target.result}" alt="Course Image" class="w-full h-full object-cover">`;
+            };
+            reader.readAsDataURL(imageInput.files[0]);
+        } else {
+            previewImage.innerHTML = '<i class="fas fa-image text-6xl text-gray-400"></i>';
+        }
+    }
+    
+    titleInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    durationInput.addEventListener('input', updatePreview);
+    priceInput.addEventListener('input', updatePreview);
+    imageInput.addEventListener('change', updatePreview);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Coupon - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-black">Edit Coupon: {{ coupon.code }}</h1>
+        <p class="text-gray-600">Modify the coupon settings and restrictions</p>
+    </div>
+    
+    <div class="bg-white shadow-lg rounded-lg p-8">
+        <form method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Coupon Code (Read-only) -->
+                <div>
+                    <label for="code" class="block text-sm font-medium text-black">Coupon Code</label>
+                    <input type="text" id="code" value="{{ coupon.code }}" readonly
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm">
+                    <p class="mt-1 text-xs text-gray-500">Coupon code cannot be changed after creation</p>
+                </div>
+                
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-black">Description *</label>
+                    <input type="text" id="description" name="description" required value="{{ coupon.description }}"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Discount Type -->
+                <div>
+                    <label for="discount_type" class="block text-sm font-medium text-black">Discount Type *</label>
+                    <select id="discount_type" name="discount_type" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black">
+                        <option value="percentage" {% if coupon.discount_type == 'percentage' %}selected{% endif %}>Percentage (%)</option>
+                        <option value="fixed" {% if coupon.discount_type == 'fixed' %}selected{% endif %}>Fixed Amount (₦)</option>
+                    </select>
+                </div>
+                
+                <!-- Discount Value -->
+                <div>
+                    <label for="discount_value" class="block text-sm font-medium text-black">Discount Value *</label>
+                    <input type="number" id="discount_value" name="discount_value" required min="0" step="0.01" value="{{ coupon.discount_value }}"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black">
+                    <p class="mt-1 text-xs text-gray-500">Enter percentage (0-100) or fixed amount in Naira</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Minimum Amount -->
+                <div>
+                    <label for="min_amount" class="block text-sm font-medium text-black">Minimum Order Amount (₦)</label>
+                    <input type="number" id="min_amount" name="min_amount" min="0" step="0.01" value="{{ coupon.min_amount }}"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black">
+                    <p class="mt-1 text-xs text-gray-500">Minimum course price required to use this coupon</p>
+                </div>
+                
+                <!-- Max Discount (for percentage) -->
+                <div id="max_discount_field" style="display: {% if coupon.discount_type == 'percentage' %}block{% else %}none{% endif %};">
+                    <label for="max_discount" class="block text-sm font-medium text-black">Maximum Discount (₦)</label>
+                    <input type="number" id="max_discount" name="max_discount" min="0" step="0.01" value="{{ coupon.max_discount or '' }}"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+                           placeholder="e.g., 10000">
+                    <p class="mt-1 text-xs text-gray-500">Maximum discount amount for percentage coupons</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Usage Limit -->
+                <div>
+                    <label for="usage_limit" class="block text-sm font-medium text-black">Total Usage Limit</label>
+                    <input type="number" id="usage_limit" name="usage_limit" min="1" value="{{ coupon.usage_limit or '' }}"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+                           placeholder="Leave empty for unlimited">
+                    <p class="mt-1 text-xs text-gray-500">Maximum number of times this coupon can be used (Used: {{ coupon.used_count }})</p>
+                </div>
+                
+                <!-- User Limit -->
+                <div>
+                    <label for="user_limit" class="block text-sm font-medium text-black">Per User Limit</label>
+                    <input type="number" id="user_limit" name="user_limit" min="1" value="{{ coupon.user_limit }}"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black">
+                    <p class="mt-1 text-xs text-gray-500">How many times each user can use this coupon</p>
+                </div>
+            </div>
+            
+            <!-- Valid Until -->
+            <div>
+                <label for="valid_until" class="block text-sm font-medium text-black">Valid Until</label>
+                <input type="datetime-local" id="valid_until" name="valid_until" 
+                       value="{% if coupon.valid_until %}{{ coupon.valid_until.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black">
+                <p class="mt-1 text-xs text-gray-500">Leave empty for no expiration date</p>
+            </div>
+            
+            <!-- Active Status -->
+            <div class="flex items-center">
+                <input type="checkbox" id="is_active" name="is_active" {% if coupon.is_active %}checked{% endif %}
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="is_active" class="ml-2 block text-sm text-black">
+                    Active (coupon can be used by students)
+                </label>
+            </div>
+            
+            <!-- Submit Buttons -->
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('admin_coupons') }}" 
+                   class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition duration-300">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                    Update Coupon
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const discountTypeSelect = document.getElementById('discount_type');
+    const maxDiscountField = document.getElementById('max_discount_field');
+    const discountValueInput = document.getElementById('discount_value');
+    
+    function toggleMaxDiscountField() {
+        if (discountTypeSelect.value === 'percentage') {
+            maxDiscountField.style.display = 'block';
+            discountValueInput.placeholder = 'e.g., 20';
+        } else {
+            maxDiscountField.style.display = 'none';
+            discountValueInput.placeholder = 'e.g., 5000';
+        }
+    }
+    
+    discountTypeSelect.addEventListener('change', toggleMaxDiscountField);
+});
+</script>
+{% endblock %}

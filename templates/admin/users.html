@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-black">Manage Users</h1>
+            <p class="text-black">View and manage all registered users</p>
+        </div>
+        <div class="flex space-x-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Users Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Users</p>
+                    <p class="text-2xl font-semibold text-black">{{ users|length }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-user-graduate text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Students</p>
+                    <p class="text-2xl font-semibold text-black">{{ users|selectattr('role', 'equalto', 'student')|list|length }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <i class="fas fa-user-tie text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Staff</p>
+                    <p class="text-2xl font-semibold text-black">{{ users|selectattr('role', 'equalto', 'staff')|list|length }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-red-100 text-red-600">
+                    <i class="fas fa-user-times text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Inactive</p>
+                    <p class="text-2xl font-semibold text-black">{{ users|selectattr('role', 'equalto', 'inactive')|list|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-black">All Users</h3>
+        </div>
+        
+        {% if users %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-user text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-black">{{ user.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex flex-col space-y-1">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {% if user.role == 'admin' %}bg-purple-100 text-purple-800
+                                    {% elif user.role == 'staff' %}bg-yellow-100 text-yellow-800
+                                    {% elif user.role == 'student' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ user.role.title() }}
+                                </span>
+                                {% if user.role == 'admin' and not user.admin_approved %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Pending Approval
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ user.applications|length }} applications
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ user.created_at.strftime('%B %d, %Y') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('edit_user', user_id=user.id) }}" 
+                                   class="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-50" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
+                                {% if user.role == 'admin' and not user.admin_approved and user.id != current_user.id %}
+                                <button onclick="approveAdmin({{ user.id }}, '{{ user.name }}')" 
+                                        class="text-green-600 hover:text-green-900 p-2 rounded hover:bg-green-50" 
+                                        title="Approve Admin">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                
+                                <button onclick="rejectAdmin({{ user.id }}, '{{ user.name }}')" 
+                                        class="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-50" 
+                                        title="Reject Admin">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% elif user.id != current_user.id %}
+                                <button onclick="toggleUserStatus({{ user.id }}, '{{ user.role }}')" 
+                                        class="{% if user.role == 'inactive' %}text-green-600 hover:text-green-900{% else %}text-yellow-600 hover:text-yellow-900{% endif %} p-2 rounded hover:bg-gray-50" 
+                                        title="{% if user.role == 'inactive' %}Activate User{% else %}Deactivate User{% endif %}">
+                                    <i class="fas fa-{% if user.role == 'inactive' %}user-check{% else %}user-times{% endif %}"></i>
+                                </button>
+                                
+                                <button onclick="confirmDelete({{ user.id }}, '{{ user.name }}')" 
+                                        class="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-50" title="Delete User">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% else %}
+                                <span class="text-gray-400 p-2" title="Cannot modify your own account">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-users text-6xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl text-black mb-2">No users found</h3>
+            <p class="text-gray-500">No users have registered yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Hidden Delete Form -->
+<form id="deleteForm" method="POST" style="display: none;">
+    <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<!-- Hidden Toggle Status Form -->
+<form id="toggleStatusForm" method="POST" style="display: none;">
+    <input type="hidden" name="_method" value="POST">
+</form>
+
+<script>
+function confirmDelete(userId, userName) {
+    if (confirm(`Are you sure you want to delete the user "${userName}"?\n\nThis action cannot be undone and will also delete all their applications.`)) {
+        // Create a form to submit the delete request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/users/${userId}/delete`;
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function toggleUserStatus(userId, currentRole) {
+    const action = currentRole === 'inactive' ? 'activate' : 'deactivate';
+    if (confirm(`Are you sure you want to ${action} this user?`)) {
+        // Create a form to submit the toggle request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/users/${userId}/toggle-status`;
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function approveAdmin(adminId, adminName) {
+    if (confirm(`Are you sure you want to approve "${adminName}" as an admin?\n\nThis will give them full admin access to the platform.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/approve-admin/${adminId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function rejectAdmin(adminId, adminName) {
+    if (confirm(`Are you sure you want to reject "${adminName}"'s admin application?\n\nThey will be converted to a regular student account.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/reject-admin/${adminId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

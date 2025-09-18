@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - SMIICT Institute Course Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-black mb-4">Contact Us</h1>
+        <p class="text-xl text-black">Get in touch with us for any questions or support</p>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Contact Form -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-semibold text-black mb-6">Send us a Message</h2>
+            
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-black mb-2">Full Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-black mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black">
+                </div>
+                
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-black mb-2">Subject</label>
+                    <select id="subject" name="subject" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black">
+                        <option value="">Select a subject</option>
+                        <option value="General Inquiry">General Inquiry</option>
+                        <option value="Course Information">Course Information</option>
+                        <option value="Technical Support">Technical Support</option>
+                        <option value="Payment Issues">Payment Issues</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="message" class="block text-sm font-medium text-black mb-2">Message</label>
+                    <textarea id="message" name="message" rows="6" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                              placeholder="Please describe your inquiry in detail..."></textarea>
+                </div>
+                
+                <button type="submit"
+                        class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 font-semibold">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Send Message
+                </button>
+            </form>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="space-y-8">
+            <!-- Contact Details -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-6">Get in Touch</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                            <i class="fas fa-envelope text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Email Address</h3>
+                            <p class="text-gray-600">samueloluwapelumi8@gmail.com</p>
+                            <p class="text-sm text-gray-500">We'll respond within 24 hours</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                            <i class="fas fa-phone text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Phone Number</h3>
+                            <p class="text-gray-600">07077705842</p>
+                            <p class="text-sm text-gray-500">Available 9 AM - 6 PM (Mon-Fri)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                            <i class="fas fa-clock text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Business Hours</h3>
+                            <p class="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                            <p class="text-gray-600">Saturday: 10:00 AM - 4:00 PM</p>
+                            <p class="text-gray-600">Sunday: Closed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-6">Frequently Asked Questions</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">How do I apply for a course?</h3>
+                        <p class="text-gray-600 text-sm">Browse our courses, click on "View Details", then "Apply for this Course" to start your application process.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">What payment methods do you accept?</h3>
+                        <p class="text-gray-600 text-sm">We accept credit/debit cards, bank transfers, and mobile money payments.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Do you offer certificates?</h3>
+                        <p class="text-gray-600 text-sm">Yes, all our courses come with professional certificates upon successful completion.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Can I get a refund?</h3>
+                        <p class="text-gray-600 text-sm">Refunds are available within 7 days of payment if you haven't started the course.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

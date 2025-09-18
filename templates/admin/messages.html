@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Contact Messages</h1>
+        <p class="text-gray-600">View and manage messages from your website visitors</p>
+    </div>
+    
+    {% if messages %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+            {% for message in messages %}
+            <li class="px-6 py-4 {% if not message.is_read %}bg-blue-50{% endif %}" data-message-id="{{ message.id }}">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <h3 class="text-lg font-medium text-gray-900">{{ message.name }}</h3>
+                                {% if not message.is_read %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    New
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ message.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </div>
+                        </div>
+                        <div class="mt-1">
+                            <p class="text-sm font-medium text-gray-700">{{ message.subject }}</p>
+                            <p class="text-sm text-gray-600 mt-1">{{ message.message[:200] }}{% if message.message|length > 200 %}...{% endif %}</p>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-sm text-gray-500">From: {{ message.email }}</span>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex items-center space-x-2">
+                        <button onclick="replyToMessage('{{ message.email }}', '{{ message.subject }}')" 
+                                class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-100"
+                                title="Reply to {{ message.email }}">
+                            <i class="fas fa-reply"></i>
+                        </button>
+                        {% if not message.is_read %}
+                        <button onclick="markAsRead({{ message.id }})" 
+                                class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-100"
+                                title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('delete_message', message_id=message.id) }}" 
+                              class="inline" onsubmit="return confirm('Are you sure you want to delete this message?')">
+                            <button type="submit" 
+                                    class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-100"
+                                    title="Delete message">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Full Message (Expandable) -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <button onclick="toggleMessage({{ message.id }})" 
+                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        <i class="fas fa-chevron-down mr-1" id="icon-{{ message.id }}"></i>
+                        <span id="text-{{ message.id }}">Show full message</span>
+                    </button>
+                    <div id="message-{{ message.id }}" class="hidden mt-2 p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-700 whitespace-pre-line">{{ message.message }}</p>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <i class="fas fa-envelope text-6xl text-gray-400 mb-4"></i>
+        <h3 class="text-xl text-gray-600 mb-2">No messages yet</h3>
+        <p class="text-gray-500">Messages from your contact form will appear here.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Mark all messages as read when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Optional: Auto-mark all messages as read when admin views the page
+    // Uncomment the following lines if you want this behavior
+    /*
+    const unreadMessages = document.querySelectorAll('li[data-message-id]');
+    unreadMessages.forEach(li => {
+        const messageId = li.getAttribute('data-message-id');
+        if (li.classList.contains('bg-blue-50')) {
+            markAsRead(messageId);
+        }
+    });
+    */
+});
+
+function toggleMessage(messageId) {
+    const messageDiv = document.getElementById('message-' + messageId);
+    const icon = document.getElementById('icon-' + messageId);
+    const text = document.getElementById('text-' + messageId);
+    
+    if (messageDiv.classList.contains('hidden')) {
+        messageDiv.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+        text.textContent = 'Hide message';
+    } else {
+        messageDiv.classList.add('hidden');
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+        text.textContent = 'Show full message';
+    }
+}
+
+function replyToMessage(email, subject) {
+    // Create a mailto link with pre-filled subject
+    const subjectLine = subject.startsWith('Re: ') ? subject : `Re: ${subject}`;
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subjectLine)}`;
+    
+    // Open the default email client
+    window.location.href = mailtoLink;
+}
+
+function markAsRead(messageId) {
+    fetch(`/admin/messages/${messageId}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the "New" badge and mark as read styling
+            const messageElement = document.querySelector(`li[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                messageElement.classList.remove('bg-blue-50');
+                const newBadge = messageElement.querySelector('.bg-blue-100');
+                if (newBadge) {
+                    newBadge.remove();
+                }
+            }
+            
+            // Hide the mark as read button
+            const markReadButton = document.querySelector(`button[onclick="markAsRead(${messageId})"]`);
+            if (markReadButton) {
+                markReadButton.style.display = 'none';
+            }
+            
+            // Show success message
+            showNotification('Message marked as read', 'success');
+        } else {
+            showNotification('Failed to mark message as read', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error marking message as read', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

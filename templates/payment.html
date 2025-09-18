@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - {{ application.course.title }} - SMIICT Institute Course Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <a href="{{ url_for('course_detail', course_id=application.course.id) }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Back to Course Details
+    </a>
+    
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-black mb-6">Complete Your Payment</h1>
+        
+        <!-- Application Summary -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-black mb-4">Application Summary</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold text-black mb-2">Course Details</h3>
+                    <p class="text-black mb-1"><strong>Course:</strong> {{ application.course.title }}</p>
+                    <p class="text-black mb-1"><strong>Duration:</strong> {{ application.course.duration }}</p>
+                    <p class="text-black"><strong>Price:</strong> ₦{{ application.course.price }}</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-black mb-2">Student Information</h3>
+                    <p class="text-black mb-1"><strong>Name:</strong> {{ application.user.name }}</p>
+                    <p class="text-black mb-1"><strong>Email:</strong> {{ application.user.email }}</p>
+                    <p class="text-black"><strong>Applied:</strong> {{ application.applied_at.strftime('%B %d, %Y') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Section -->
+        <div class="border-t pt-8">
+            <h2 class="text-2xl font-semibold text-black mb-6">Payment Information</h2>
+            
+            <!-- Paystack Payment Integration -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 class="text-blue-800 font-semibold mb-4">Secure Payment with Paystack</h3>
+                <p class="text-blue-700 mb-4">
+                    Click the button below to proceed with a secure payment. You'll be redirected to Paystack's secure payment page where you can pay with your card, bank transfer, or mobile money.
+                </p>
+                
+                <!-- Payment Methods Info -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 bg-white rounded-lg border">
+                        <i class="fas fa-credit-card text-2xl text-blue-600 mb-2"></i>
+                        <p class="text-sm font-medium text-black">Card Payment</p>
+                        <p class="text-xs text-gray-600">Visa, Mastercard, Verve</p>
+                    </div>
+                    <div class="text-center p-4 bg-white rounded-lg border">
+                        <i class="fas fa-university text-2xl text-green-600 mb-2"></i>
+                        <p class="text-sm font-medium text-black">Bank Transfer</p>
+                        <p class="text-xs text-gray-600">Direct bank transfer</p>
+                    </div>
+                    <div class="text-center p-4 bg-white rounded-lg border">
+                        <i class="fas fa-mobile-alt text-2xl text-purple-600 mb-2"></i>
+                        <p class="text-sm font-medium text-black">Mobile Money</p>
+                        <p class="text-xs text-gray-600">MTN, Airtel, 9mobile</p>
+                    </div>
+                </div>
+                
+                <!-- Coupon Code Section -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="text-lg font-semibold text-black mb-3">Have a Coupon Code?</h4>
+                    <div class="flex space-x-2">
+                        <input type="text" id="coupon-code" name="coupon_code" 
+                               placeholder="Enter coupon code"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black">
+                        <button type="button" id="apply-coupon-btn" 
+                                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
+                            Apply
+                        </button>
+                    </div>
+                    <div id="coupon-message" class="mt-2 text-sm hidden"></div>
+                </div>
+                
+                <!-- Pay with Paystack Button -->
+                <form id="paystack-form" method="POST" action="{{ url_for('initialize_payment') }}">
+                    <input type="hidden" name="application_id" value="{{ application.id }}">
+                    <input type="hidden" name="coupon_code" id="coupon-code-hidden" value="">
+                    <button type="submit" id="paystack-button" 
+                            class="w-full bg-green-600 text-white py-4 px-8 rounded-lg hover:bg-green-700 transition duration-300 font-semibold text-lg">
+                        <i class="fas fa-lock mr-2"></i>
+                        <span id="payment-amount">Pay ₦{{ application.course.price }} with Paystack</span>
+                    </button>
+                </form>
+                
+                <!-- Security Notice -->
+                <div class="mt-4 p-3 bg-green-100 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                        <p class="text-green-800 text-sm">
+                            <strong>Secure Payment:</strong> Your payment is processed securely by Paystack. We never store your card details.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Summary -->
+            <div class="bg-gray-50 rounded-lg p-6 mt-6">
+                <h3 class="text-lg font-semibold text-black mb-4">Payment Summary</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-black">Course Price:</span>
+                        <span class="text-lg font-medium text-gray-700" id="original-price">₦{{ application.course.price }}</span>
+                    </div>
+                    <div id="discount-row" class="flex justify-between items-center text-green-600 hidden">
+                        <span>Discount:</span>
+                        <span class="font-medium" id="discount-amount">-₦0</span>
+                    </div>
+                    <div class="border-t border-gray-300 pt-2">
+                        <div class="flex justify-between items-center text-lg">
+                            <span class="text-black font-semibold">Total Amount:</span>
+                            <span class="text-2xl font-bold text-blue-600" id="final-price">₦{{ application.course.price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col md:flex-row gap-4 mt-6">
+                <a href="{{ url_for('course_detail', course_id=application.course.id) }}" 
+                   class="w-full md:w-auto bg-gray-500 text-white py-3 px-8 rounded-lg hover:bg-gray-600 transition duration-300 text-center font-semibold">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paystackForm = document.getElementById('paystack-form');
+    const paystackButton = document.getElementById('paystack-button');
+    const couponCodeInput = document.getElementById('coupon-code');
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const couponMessage = document.getElementById('coupon-message');
+    const couponCodeHidden = document.getElementById('coupon-code-hidden');
+    const originalPrice = {{ application.course.price|int }};
+    let appliedCoupon = null;
+    
+    // Handle coupon application
+    applyCouponBtn.addEventListener('click', function() {
+        const code = couponCodeInput.value.trim().toUpperCase();
+        if (!code) {
+            showCouponMessage('Please enter a coupon code', 'error');
+            return;
+        }
+        
+        // Disable button and show loading
+        applyCouponBtn.disabled = true;
+        applyCouponBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Applying...';
+        
+        // Validate coupon
+        fetch('/api/validate-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                code: code,
+                course_id: {{ application.course.id|int }}
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                appliedCoupon = data.coupon;
+                updatePaymentSummary(data.coupon);
+                couponCodeHidden.value = code;
+                showCouponMessage(`Coupon applied! ${data.coupon.description}`, 'success');
+            } else {
+                showCouponMessage(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showCouponMessage('Error validating coupon. Please try again.', 'error');
+        })
+        .finally(() => {
+            applyCouponBtn.disabled = false;
+            applyCouponBtn.innerHTML = 'Apply';
+        });
+    });
+    
+    function updatePaymentSummary(coupon) {
+        const discountRow = document.getElementById('discount-row');
+        const discountAmount = document.getElementById('discount-amount');
+        const finalPrice = document.getElementById('final-price');
+        const paymentAmount = document.getElementById('payment-amount');
+        
+        // Show discount row
+        discountRow.classList.remove('hidden');
+        discountAmount.textContent = `-₦${coupon.discount_amount.toLocaleString()}`;
+        
+        // Update final price
+        finalPrice.textContent = `₦${coupon.final_price.toLocaleString()}`;
+        paymentAmount.textContent = `Pay ₦${coupon.final_price.toLocaleString()} with Paystack`;
+    }
+    
+    function showCouponMessage(message, type) {
+        couponMessage.textContent = message;
+        couponMessage.className = `mt-2 text-sm ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+        couponMessage.classList.remove('hidden');
+        
+        // Hide message after 5 seconds
+        setTimeout(() => {
+            couponMessage.classList.add('hidden');
+        }, 5000);
+    }
+    
+    // Handle Paystack form submission
+    paystackForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Disable button and show loading state
+        paystackButton.disabled = true;
+        paystackButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        
+        // Submit form data
+        const formData = new FormData(paystackForm);
+        
+        fetch(paystackForm.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Payment response:', data);
+            if (data.success) {
+                window.location.href = data.authorization_url;
+            } else {
+                console.error('Payment error:', data.message);
+                alert('Error: ' + data.message);
+                paystackButton.disabled = false;
+                const currentPrice = appliedCoupon ? appliedCoupon.final_price : originalPrice;
+                paystackButton.innerHTML = `<i class="fas fa-lock mr-2"></i>Pay ₦${currentPrice.toLocaleString()} with Paystack`;
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('An error occurred. Please try again. Error: ' + error.message);
+            paystackButton.disabled = false;
+            const currentPrice = appliedCoupon ? appliedCoupon.final_price : originalPrice;
+            paystackButton.innerHTML = `<i class="fas fa-lock mr-2"></i>Pay ₦${currentPrice.toLocaleString()} with Paystack`;
+        });
+    });
+});
+</script>
+{% endblock %}

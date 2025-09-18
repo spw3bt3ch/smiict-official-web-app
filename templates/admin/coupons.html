@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Coupon Management - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-black">Coupon Management</h1>
+        <p class="text-gray-600">Create and manage discount coupons for your courses</p>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mb-6 flex flex-wrap gap-4">
+        <a href="{{ url_for('create_coupon') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+            <i class="fas fa-plus mr-2"></i>
+            Create New Coupon
+        </a>
+    </div>
+    
+    {% if coupons %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">All Coupons</h3>
+        </div>
+        <ul class="divide-y divide-gray-200">
+            {% for coupon in coupons %}
+            <li class="px-6 py-4 {% if not coupon.is_active %}bg-gray-50{% endif %}">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <h3 class="text-lg font-medium text-gray-900">{{ coupon.code }}</h3>
+                                {% if not coupon.is_active %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Inactive
+                                </span>
+                                {% else %}
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                Created {{ coupon.created_at.strftime('%B %d, %Y') }}
+                            </div>
+                        </div>
+                        <div class="mt-1">
+                            <p class="text-sm text-gray-600">{{ coupon.description }}</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                                <span>
+                                    <strong>Discount:</strong> 
+                                    {% if coupon.discount_type == 'percentage' %}
+                                        {{ coupon.discount_value }}%
+                                        {% if coupon.max_discount %}
+                                            (max ₦{{ "%.2f"|format(coupon.max_discount) }})
+                                        {% endif %}
+                                    {% else %}
+                                        ₦{{ "%.2f"|format(coupon.discount_value) }}
+                                    {% endif %}
+                                </span>
+                                {% if coupon.min_amount > 0 %}
+                                <span><strong>Min Amount:</strong> ₦{{ "%.2f"|format(coupon.min_amount) }}</span>
+                                {% endif %}
+                                {% if coupon.usage_limit %}
+                                <span><strong>Usage Limit:</strong> {{ coupon.used_count }}/{{ coupon.usage_limit }}</span>
+                                {% else %}
+                                <span><strong>Used:</strong> {{ coupon.used_count }} times</span>
+                                {% endif %}
+                                {% if coupon.valid_until %}
+                                <span><strong>Expires:</strong> {{ coupon.valid_until.strftime('%B %d, %Y') }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex items-center space-x-2">
+                        <a href="{{ url_for('edit_coupon', coupon_id=coupon.id) }}" 
+                           class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-100"
+                           title="Edit Coupon">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('toggle_coupon_status', coupon_id=coupon.id) }}" 
+                              class="inline">
+                            <button type="submit" 
+                                    class="text-{% if coupon.is_active %}yellow{% else %}green{% endif %}-600 hover:text-{% if coupon.is_active %}yellow{% else %}green{% endif %}-800 p-2 rounded-lg hover:bg-{% if coupon.is_active %}yellow{% else %}green{% endif %}-100"
+                                    title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %} Coupon">
+                                <i class="fas fa-{% if coupon.is_active %}pause{% else %}play{% endif %}"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('delete_coupon', coupon_id=coupon.id) }}" 
+                              class="inline" onsubmit="return confirm('Are you sure you want to delete this coupon? This action cannot be undone.')">
+                            <button type="submit" 
+                                    class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-100"
+                                    title="Delete Coupon">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <i class="fas fa-ticket-alt text-6xl text-gray-400 mb-4"></i>
+        <h3 class="text-xl text-gray-600 mb-2">No coupons yet</h3>
+        <p class="text-gray-500">Create your first coupon to start offering discounts to students.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

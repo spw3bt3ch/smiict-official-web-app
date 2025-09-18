@@ -1,0 +1,54 @@
+SMIICT Institute - Professional IT Training and Certification
+==================================================
+
+Dear {{ user_name }},
+
+Thank you for your interest in our {{ course.title }} course! We're excited to have you join our learning community.
+
+COURSE INFORMATION
+==================
+Course Title: {{ course.title }}
+Course Duration: {{ course.duration }}
+Course Fee: ₦{{ "{:,}".format(course.price) }}
+Application Date: {{ application_date }}
+Application Status: {{ application_status }}
+
+Course Description:
+{{ course.description }}
+
+WHAT TO PREPARE FOR THIS COURSE
+===============================
+• Laptop/Computer: A reliable computer with internet connection for hands-on practice
+• Software Requirements: We'll provide you with a list of required software during orientation
+• Learning Materials: All course materials will be provided digitally
+• Time Commitment: Plan to dedicate {{ course.duration }} to complete this course
+• Prerequisites: Basic computer literacy (specific requirements will be shared in orientation)
+• Notebook: Keep a notebook handy for taking notes during sessions
+
+NEXT STEPS
+==========
+1. Complete Payment: If you haven't already, complete your course payment
+2. Orientation Session: Attend our orientation session (details will be sent separately)
+3. Course Materials: Access your course materials through our learning portal
+4. Join Community: Connect with fellow students in our learning community
+
+NEED HELP?
+==========
+If you have any questions or need assistance, please don't hesitate to contact us:
+
+Email: {{ contact_email }}
+Phone: {{ contact_phone }}
+Website: {{ website_url }}
+
+Course Details: {{ course_url }}
+Dashboard: {{ dashboard_url }}
+
+We look forward to seeing you in class and helping you achieve your learning goals!
+
+Best regards,
+The SMIICT Institute Team
+
+---
+SMIICT Institute - Professional IT Training and Certification
+This email was sent to {{ user_email }} because you applied for our {{ course.title }} course.
+© 2024 SMIICT Institute. All rights reserved.

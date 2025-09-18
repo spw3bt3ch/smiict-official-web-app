@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SMIICT Institute Course Platform{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='uploads/SMI_logo_png.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}" media="print">
+    {% if request.endpoint and request.endpoint.startswith('admin') %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% endif %}
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="text-white shadow-lg relative" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d2d2d 50%, #1a1a1a 75%, #0f0f0f 100%);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="flex-shrink-0 flex items-center text-white hover:text-blue-200 transition-colors duration-300">
+                        <img src="{{ url_for('static', filename='uploads/SMI_logo_png.png') }}" alt="SMIICT Institute" class="h-10 w-auto mr-2">
+                        <!-- <span class="text-xl font-bold">SMIICT Institute</span> -->
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{{ url_for('index') }}" class="nav-link text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                    <a href="{{ url_for('contact') }}" class="nav-link text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {% if request.endpoint == 'contact' %}active{% endif %}">Contact</a>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {% if request.endpoint and request.endpoint.startswith('admin') %}active{% endif %}">Admin</a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}" class="nav-link text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Logout</a>
+                        <span class="text-white text-sm">Welcome, {{ current_user.name }}</span>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="nav-link text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 {% if request.endpoint == 'login' %}active{% endif %}">Login</a>
+                        <a href="{{ url_for('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Register</a>
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-white hover:text-blue-200 focus:outline-none focus:text-blue-200 p-2 transition-colors duration-300">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden absolute top-16 left-0 right-0 shadow-lg z-50 w-full" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d2d2d 50%, #1a1a1a 75%, #0f0f0f 100%);">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="{{ url_for('index') }}" class="nav-link block text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                    <a href="{{ url_for('contact') }}" class="nav-link block text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 {% if request.endpoint == 'contact' %}active{% endif %}">Contact</a>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link block text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 {% if request.endpoint and request.endpoint.startswith('admin') %}active{% endif %}">Admin</a>
+                        {% endif %}
+                        <div class="border-t border-blue-600 pt-2 mt-2">
+                            <div class="px-3 py-2 text-sm text-white">Welcome, {{ current_user.name }}</div>
+                            <a href="{{ url_for('logout') }}" class="nav-link block text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Logout</a>
+                        </div>
+                    {% else %}
+                        <div class="border-t border-blue-600 pt-2 mt-2 space-y-1">
+                            <a href="{{ url_for('login') }}" class="nav-link block text-white hover:bg-blue-600 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-300 {% if request.endpoint == 'login' %}active{% endif %}">Login</a>
+                            <a href="{{ url_for('register') }}" class="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-base font-medium text-center transition-colors duration-300">Register</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }} bg-{{ 'green' if category == 'success' else 'red' }}-100 border border-{{ 'green' if category == 'success' else 'red' }}-400 text-{{ 'green' if category == 'success' else 'red' }}-700 px-4 py-3 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-white py-8" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #2d2d2d 50%, #1a1a1a 75%, #0f0f0f 100%);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <img src="{{ url_for('static', filename='uploads/SMI_logo_png.png') }}" alt="SMIICT Institute" class="h-8 w-auto mr-2">
+                        <!-- <h3 class="text-lg font-semibold">SMIICT Institute</h3> -->
+                    </div>
+                    <p class="text-gray-300">Professional IT training and <br> certification courses.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('index') }}" class="text-gray-300 hover:text-white">Home</a></li>
+                        <li><a href="{{ url_for('contact') }}" class="text-gray-300 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact Info</h3>
+                    <p class="text-gray-300">Email: samueloluwapelumi8@gmail.com</p>
+                    <p class="text-gray-300">Phone: 07077705842</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-600 mt-8 pt-8 text-center">
+                <p class="text-gray-300">&copy; 2024 SMIICT Institute. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

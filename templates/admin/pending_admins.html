@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Admin Approvals - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-black">Pending Admin Approvals</h1>
+            <p class="text-black">Review and approve new admin registrations</p>
+        </div>
+        <div class="flex space-x-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Dashboard
+            </a>
+            <a href="{{ url_for('admin_users') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+                <i class="fas fa-users mr-2"></i>
+                All Users
+            </a>
+        </div>
+    </div>
+    
+    <!-- Pending Admins Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <i class="fas fa-clock text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Pending Approvals</p>
+                    <p class="text-2xl font-semibold text-black">{{ pending_admins|length }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-user-check text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Approved Today</p>
+                    <p class="text-2xl font-semibold text-black">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-red-100 text-red-600">
+                    <i class="fas fa-user-times text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Rejected Today</p>
+                    <p class="text-2xl font-semibold text-black">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending Admins Table -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-black">Admin Applications</h3>
+        </div>
+        
+        {% if pending_admins %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for admin in pending_admins %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                        <i class="fas fa-user-clock text-yellow-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-black">{{ admin.name }}</div>
+                                    <div class="text-sm text-gray-500">ID: {{ admin.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ admin.email }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ admin.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Pending Approval
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button onclick="approveAdmin({{ admin.id }}, '{{ admin.name }}')" 
+                                        class="text-green-600 hover:text-green-900 p-2 rounded hover:bg-green-50" 
+                                        title="Approve Admin">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                
+                                <button onclick="rejectAdmin({{ admin.id }}, '{{ admin.name }}')" 
+                                        class="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-50" 
+                                        title="Reject Admin">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                
+                                <a href="{{ url_for('edit_user', user_id=admin.id) }}" 
+                                   class="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-50" 
+                                   title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-user-check text-6xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl text-black mb-2">No pending admin approvals</h3>
+            <p class="text-gray-500">All admin applications have been reviewed.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Hidden Forms -->
+<form id="approveForm" method="POST" style="display: none;">
+    <input type="hidden" name="_method" value="POST">
+</form>
+
+<form id="rejectForm" method="POST" style="display: none;">
+    <input type="hidden" name="_method" value="POST">
+</form>
+
+<script>
+function approveAdmin(adminId, adminName) {
+    if (confirm(`Are you sure you want to approve "${adminName}" as an admin?\n\nThis will give them full admin access to the platform.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/approve-admin/${adminId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function rejectAdmin(adminId, adminName) {
+    if (confirm(`Are you sure you want to reject "${adminName}"'s admin application?\n\nThey will be converted to a regular student account.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/reject-admin/${adminId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SMIICT Institute Course Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-black">Admin Dashboard</h1>
+        <p class="text-black">Welcome back, {{ current_user.name }}! Here's an overview of your platform.</p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="admin-stats">
+        <div class="admin-stat-card">
+            <div class="admin-stat-header">
+                <div class="admin-stat-icon primary">
+                    <i class="fas fa-book"></i>
+                </div>
+            </div>
+            <div class="admin-stat-value">{{ courses|length }}</div>
+            <div class="admin-stat-label">Total Courses</div>
+        </div>
+        
+        <div class="admin-stat-card success">
+            <div class="admin-stat-header">
+                <div class="admin-stat-icon success">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="admin-stat-value">{{ applications|length }}</div>
+            <div class="admin-stat-label">Total Applications</div>
+        </div>
+        
+        <div class="admin-stat-card warning">
+            <div class="admin-stat-header">
+                <div class="admin-stat-icon warning">
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+            <div class="admin-stat-value">{{ messages|selectattr('is_read', 'equalto', false)|list|length }}</div>
+            <div class="admin-stat-label">New Messages</div>
+        </div>
+        
+        <div class="admin-stat-card">
+            <div class="admin-stat-header">
+                <div class="admin-stat-icon primary">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+            <div class="admin-stat-value">₦{{ applications|sum(attribute='course.price') }}</div>
+            <div class="admin-stat-label">Total Revenue</div>
+        </div>
+        
+        <div class="admin-stat-card success">
+            <div class="admin-stat-header">
+                <div class="admin-stat-icon success">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="admin-stat-value">{{ users|length }}</div>
+            <div class="admin-stat-label">Total Users</div>
+        </div>
+        
+        <div class="admin-stat-card warning">
+            <div class="admin-stat-header">
+                <div class="admin-stat-icon warning">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+            </div>
+            <div class="admin-stat-value">{{ users|selectattr('role', 'equalto', 'admin')|selectattr('admin_approved', 'equalto', false)|list|length }}</div>
+            <div class="admin-stat-label">Pending Admins</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Applications -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Recent Applications</h3>
+            </div>
+            <div class="p-6">
+                {% if applications %}
+                <div class="space-y-4">
+                    {% for application in applications[:5] %}
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <p class="font-medium text-gray-900">{{ application.user.name }}</p>
+                            <p class="text-sm text-gray-600">{{ application.course.title }}</p>
+                            <p class="text-xs text-gray-500">{{ application.applied_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full
+                            {% if application.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif application.status == 'approved' %}bg-green-100 text-green-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ application.status.title() }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-4">No applications yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Recent Messages -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Recent Messages</h3>
+            </div>
+            <div class="p-6">
+                {% if messages %}
+                <div class="space-y-4">
+                    {% for message in messages[:5] %}
+                    <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">{{ message.name }}</p>
+                            <p class="text-sm text-gray-600">{{ message.subject }}</p>
+                            <p class="text-xs text-gray-500">{{ message.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            {% if not message.is_read %}
+                            <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
+                            {% endif %}
+                            <a href="{{ url_for('admin_messages') }}" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-4">No messages yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Action Buttons -->
+    <div class="mt-8 flex flex-wrap gap-4">
+        <a href="{{ url_for('add_course') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+            <i class="fas fa-plus mr-2"></i>
+            Add New Course
+        </a>
+        <a href="{{ url_for('admin_courses') }}" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300">
+            <i class="fas fa-book mr-2"></i>
+            Manage Courses
+        </a>
+        <a href="{{ url_for('admin_messages') }}" class="bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 transition duration-300">
+            <i class="fas fa-envelope mr-2"></i>
+            View Messages
+        </a>
+        <a href="{{ url_for('admin_users') }}" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition duration-300">
+            <i class="fas fa-users mr-2"></i>
+            Manage Users
+        </a>
+        <a href="{{ url_for('pending_admins') }}" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition duration-300">
+            <i class="fas fa-user-clock mr-2"></i>
+            Pending Admins
+        </a>
+        <a href="{{ url_for('admin_coupons') }}" class="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition duration-300">
+            <i class="fas fa-ticket-alt mr-2"></i>
+            Manage Coupons
+        </a>
+    </div>
+</div>
+{% endblock %}
